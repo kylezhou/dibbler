@@ -25,6 +25,7 @@
 #include "SrvOptIA_NA.h"
 #include "SrvOptTA.h"
 #include "SrvOptIA_PD.h"
+#include "OptPD_Exclude.h"
 #include "OptVendorData.h"
 #include "OptGeneric.h"
 

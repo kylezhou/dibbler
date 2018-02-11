@@ -58,6 +58,10 @@ class TSrvOptIA_PD : public TOptIA_PD
     uint32_t Valid;
     unsigned long PDLength;
 
+    bool PD_ExcludeRequested;
+    void addOptIAPrefix(SPtr<TIPv6Addr> prefix, char length,
+                        unsigned long pref, unsigned long valid);
+
 };
 
 #endif

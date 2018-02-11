@@ -35,6 +35,7 @@
 #include "NodeConstant.h"
 #include "NodeClientSpecific.h"
 #include "NodeOperator.h"
+#include "SubnetID.h"
 
 using namespace std;
 
@@ -115,7 +116,7 @@ virtual ~SrvParser();
 %token IFACE_MAX_LEASE_, CLASS_MAX_LEASE_, CLNT_MAX_LEASE_
 %token STATELESS_
 %token CACHE_SIZE_
-%token PDCLASS_, PD_LENGTH_, PD_POOL_
+%token PDCLASS_, PD_LENGTH_, PD_POOL_, PD_EXCLUDE_LEN_, PD_EXCLUDE_SUBNET_
 %token SCRIPT_
 %token VENDOR_SPEC_
 %token CLIENT_, DUID_KEYWORD_, REMOTE_ID_, LINK_LOCAL_, ADDRESS_, PREFIX_, GUESS_MODE_
@@ -485,6 +486,8 @@ PDOptionsList
 PDOptions
 : PDLength
 | PDPoolOption
+| PDExcludeSubnetOption
+| PDExcludeLenOption
 | ValidTimeOption
 | PreferredTimeOption
 | T1Option
@@ -502,7 +505,7 @@ NEXT_HOP_ IPV6ADDR_ '{'
 {
     SPtr<TIPv6Addr> routerAddr = new TIPv6Addr($2);
     SPtr<TOpt> myNextHop = new TOptAddr(OPTION_NEXT_HOP, routerAddr, NULL);
-    nextHop = myNextHop; 
+    nextHop = myNextHop;
 }
 RouteList '}'
 {
@@ -523,7 +526,7 @@ RouteList
 ;
 
 Route:
-ROUTE_ IPV6ADDR_ '/' INTNUMBER_ LIFETIME_ INTNUMBER_ 
+ROUTE_ IPV6ADDR_ '/' INTNUMBER_ LIFETIME_ INTNUMBER_
 {
     SPtr<TIPv6Addr> prefix = new TIPv6Addr($2);
     SPtr<TOpt> rtPrefix = new TOptRtPrefix($6, $4, 42, prefix, NULL);
@@ -718,7 +721,7 @@ VendorSpecList
     ParserOptStack.getLast()->addExtraOption(new TOptVendorSpecInfo(OPTION_VENDOR_OPTS, $1, $3,
 								    $5.duid, $5.length, 0), false);
 }
-| Number '-' Number '-' IPV6ADDR_ 
+| Number '-' Number '-' IPV6ADDR_
 {
     SPtr<TIPv6Addr> addr(new TIPv6Addr($5));
     Log(Debug) << "Vendor-spec defined: Enterprise: " << $1 << ", optionCode: "
@@ -726,7 +729,7 @@ VendorSpecList
     ParserOptStack.getLast()->addExtraOption(new TOptVendorSpecInfo(OPTION_VENDOR_OPTS, $1, $3,
 								    new TIPv6Addr($5), 0), false);
 }
-| Number '-' Number '-' STRING_ 
+| Number '-' Number '-' STRING_
 {
     Log(Debug) << "Vendor-spec defined: Enterprise: " << $1 << ", optionCode: "
 	       << $3 << ", valuelen=" << strlen($5) << LogEnd;
@@ -741,7 +744,7 @@ VendorSpecList
     ParserOptStack.getLast()->addExtraOption(new TOptVendorSpecInfo(OPTION_VENDOR_OPTS, $3, $5,
 								    $7.duid, $7.length, 0), false);
 }
-| VendorSpecList ',' Number '-' Number '-' IPV6ADDR_ 
+| VendorSpecList ',' Number '-' Number '-' IPV6ADDR_
 {
     SPtr<TIPv6Addr> addr(new TIPv6Addr($7));
     Log(Debug) << "Vendor-spec defined: Enterprise: " << $3 << ", optionCode: "
@@ -941,7 +944,24 @@ PDLength
                   << LogEnd;
         YYABORT;
     }
-   this->PDPrefix = $2;
+    this->PDPrefix = $2;
+}
+;
+PDExcludeSubnetOption
+: PD_EXCLUDE_SUBNET_ STRING_
+{
+    ParserOptStack.getLast()->setPDExcludeSubnet($2);
+}
+;
+PDExcludeLenOption
+: PD_EXCLUDE_LEN_ Number
+{
+    if ( (($2) > 127) || (($2) < 2) ) {
+        Log(Crit) << "Invalid pd-exclude-len:" << $2 << ", allowed range is 2..127."
+                  << LogEnd;
+        YYABORT;
+    }
+    ParserOptStack.getLast()->setPDExcludeLen($2);
 }
 ;
 
@@ -1648,7 +1668,7 @@ DdnsProtocol
     else if (!strcasecmp($2,"any"))
 	CfgMgr->setDDNSProtocol(TCfgMgr::DNSUPDATE_ANY);
     else {
-        Log(Crit) << "Invalid ddns-protocol specifed:" << ($2) 
+        Log(Crit) << "Invalid ddns-protocol specifed:" << ($2)
                   << ", supported values are tcp, udp, any." << LogEnd;
         YYABORT;
     }
@@ -1720,7 +1740,7 @@ LifetimeOption
 :OPTION_ LIFETIME_ Number
 {
     SPtr<TOpt> lifetime = new TOptInteger(OPTION_INFORMATION_REFRESH_TIME,
-                                          OPTION_INFORMATION_REFRESH_TIME_LEN, 
+                                          OPTION_INFORMATION_REFRESH_TIME_LEN,
                                           (uint32_t)($3), NULL);
     ParserOptStack.getLast()->addExtraOption(lifetime, false);
     //ParserOptStack.getLast()->setLifetime($3);

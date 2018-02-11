@@ -118,6 +118,8 @@ cache-size          { return SrvParser::CACHE_SIZE_; }
 pd-class	    { return SrvParser::PDCLASS_; }
 pd-length	    { return SrvParser::PD_LENGTH_; }
 pd-pool             { return SrvParser::PD_POOL_;}
+pd-exclude-len      { return SrvParser::PD_EXCLUDE_LEN_; }
+pd-exclude-subnet   { return SrvParser::PD_EXCLUDE_SUBNET_; }
 vendor-spec         { return SrvParser::VENDOR_SPEC_; }
 script              { return SrvParser::SCRIPT_; }
 

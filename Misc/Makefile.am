@@ -18,6 +18,7 @@ libMisc_a_SOURCES += DHCPConst.cpp DHCPConst.h DHCPDefaults.h
 libMisc_a_SOURCES += DUID.cpp DUID.h
 libMisc_a_SOURCES += FQDN.cpp FQDN.h
 libMisc_a_SOURCES += IPv6Addr.cpp IPv6Addr.h
+libMisc_a_SOURCES += SubnetID.cpp SubnetID.h
 libMisc_a_SOURCES += KeyList.cpp KeyList.h Key.cpp Key.h
 libMisc_a_SOURCES += Logger.cpp Logger.h
 libMisc_a_SOURCES += long128.cpp long128.h

@@ -61,7 +61,7 @@ std::string hexToText(const uint8_t* buf, size_t buf_len, bool add_colons /*= fa
         tmp << "0x";
 
     for(unsigned i = 0; i < buf_len; i++) {
-        if (i)
+        if (i && add_colons)
             tmp << ":";
         tmp << std::setfill('0') << std::setw(2) << std::hex
             << (unsigned short)((unsigned char) buf[i]);

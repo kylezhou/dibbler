@@ -21,6 +21,7 @@ libOptions_a_SOURCES += OptIAAddress.cpp OptIAAddress.h
 libOptions_a_SOURCES += OptIA.cpp OptIA.h
 libOptions_a_SOURCES += OptIA_NA.cpp OptIA_NA.h
 libOptions_a_SOURCES += OptIA_PD.cpp OptIA_PD.h
+libOptions_a_SOURCES += OptPD_Exclude.cpp OptPD_Exclude.h
 libOptions_a_SOURCES += OptIAPrefix.cpp OptIAPrefix.h
 libOptions_a_SOURCES += OptInteger.cpp OptInteger.h
 libOptions_a_SOURCES += OptOptionRequest.cpp OptOptionRequest.h

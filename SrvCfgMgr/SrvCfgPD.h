@@ -44,6 +44,7 @@ class TSrvCfgPD;
 #include "SmartPtr.h"
 #include "SrvCfgPD.h"
 #include "Node.h"
+#include "SubnetID.h"
 
 class TSrvCfgClientClass;
 
@@ -74,6 +75,9 @@ class TSrvCfgPD
     unsigned long getPD_MaxLease();
     unsigned long getID();
 
+    SPtr<TSubnetID> getPD_ExcludeSubnet();
+    uint8_t getPD_ExcludeLen();
+
     bool isLinkLocal();
 
     unsigned long getAssignedCount();
@@ -102,6 +106,8 @@ class TSrvCfgPD
     static unsigned long StaticID_;
 
     List(THostRange) PoolLst_;
+    SPtr<TSubnetID> PD_ExcludeSubnet_;
+    uint8_t PD_ExcludeLen_;
     SPtr<THostRange> CommonPool_; /* common part of all available prefix pools (section b in the description above) */
     unsigned long PD_MaxLease_;
     unsigned long PD_Assigned_;

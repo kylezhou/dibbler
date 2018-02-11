@@ -21,6 +21,7 @@ class TSrvParsClassOpt;
 #include "HostRange.h"
 #include "IPv6Addr.h"
 #include "SrvOptAddrParams.h"
+#include "SubnetID.h"
 
 class TSrvParsClassOpt
 {
@@ -51,6 +52,12 @@ class TSrvParsClassOpt
     void setValidBeg(unsigned long valid);
     unsigned long getValidEnd();
     unsigned long getValidBeg();
+
+    void setPDExcludeSubnet(const char * subnetId);
+    void setPDExcludeSubnet(SPtr<TSubnetID> subnetId);
+    SPtr<TSubnetID> getPDExcludeSubnet();
+    void setPDExcludeLen(uint8_t len);
+    uint8_t getPDExcludeLen();
 
     //Rejected clients access routines
     void addRejedClnt(SPtr<THostRange> addr);
@@ -101,6 +108,10 @@ private:
     TContainer<SPtr<THostRange> > RejedClnt;
     TContainer<SPtr<THostRange> > AcceptClnt;
     TContainer<SPtr<THostRange> > Pool;
+
+    // excluded subnet ID for PD (PD-EXCLUDE)
+    SPtr<TSubnetID> PDExcludeSubnet;
+    uint8_t PDExcludeLen;
 
     unsigned long ClassMaxLease;
 

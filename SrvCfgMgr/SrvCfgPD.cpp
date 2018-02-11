@@ -24,7 +24,7 @@ using namespace std;
 unsigned long TSrvCfgPD::StaticID_ = 0;
 
 TSrvCfgPD::TSrvCfgPD()
-    :PD_T1Beg_(SERVER_DEFAULT_MIN_T1), PD_T1End_(SERVER_DEFAULT_MAX_T1), 
+    :PD_T1Beg_(SERVER_DEFAULT_MIN_T1), PD_T1End_(SERVER_DEFAULT_MAX_T1),
      PD_T2Beg_(SERVER_DEFAULT_MIN_T2), PD_T2End_(SERVER_DEFAULT_MAX_T2),
      PD_PrefBeg_(SERVER_DEFAULT_MIN_PREF), PD_PrefEnd_(SERVER_DEFAULT_MAX_PREF),
      PD_ValidBeg_(SERVER_DEFAULT_MIN_VALID), PD_ValidEnd_(SERVER_DEFAULT_MAX_VALID)
@@ -34,6 +34,8 @@ TSrvCfgPD::TSrvCfgPD()
     PD_Assigned_ = 0;
     PD_Count_ = 0;
     PD_Length_ = 0;
+    PD_ExcludeLen_ = 0;
+    PD_ExcludeSubnet_ = SPtr<TSubnetID>();
 }
 
 TSrvCfgPD::~TSrvCfgPD() {
@@ -66,6 +68,14 @@ unsigned long TSrvCfgPD::getValid(unsigned long hintValid) {
 
 unsigned long TSrvCfgPD::getPD_Length() {
     return PD_Length_;
+}
+
+SPtr<TSubnetID> TSrvCfgPD::getPD_ExcludeSubnet() {
+    return PD_ExcludeSubnet_;
+}
+
+uint8_t TSrvCfgPD::getPD_ExcludeLen() {
+    return PD_ExcludeLen_;
 }
 
 bool TSrvCfgPD::setOptions(SPtr<TSrvParsGlobalOpt> opt, int prefixLength)
@@ -142,6 +152,11 @@ bool TSrvCfgPD::setOptions(SPtr<TSrvParsGlobalOpt> opt, int prefixLength)
     Log(Debug) << "PD: Up to " << PD_Count_ << " prefixes may be assigned." << LogEnd;
     AllowLst_ = opt->getAllowClientClassString();
     DenyLst_ = opt->getDenyClientClassString();
+
+    PD_ExcludeSubnet_ = opt->getPDExcludeSubnet();
+    PD_ExcludeLen_ = opt->getPDExcludeLen();
+    Log(Debug) << "PD-EXCLUDE: " << *PD_ExcludeSubnet_ << ", len=" << (int)PD_ExcludeLen_ << LogEnd;
+
     return true;
 }
 

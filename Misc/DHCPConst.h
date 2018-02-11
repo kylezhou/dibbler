@@ -106,6 +106,9 @@
 #define OPTION_IA_PD            25
 #define OPTION_IAPREFIX         26
 
+// RFC6603: PD Exclude Option
+#define OPTION_PD_EXCLUDE       67
+
 // RFC3898: NIS options
 #define OPTION_NIS_SERVERS	27
 #define OPTION_NISP_SERVERS	28

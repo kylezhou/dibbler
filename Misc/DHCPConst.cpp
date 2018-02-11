@@ -103,6 +103,11 @@ int allowOptInOpt(int msgType, int parent, int subopt) {
     case OPTION_IA_PD:
         if ( (subopt==OPTION_IAPREFIX) || (subopt==OPTION_STATUS_CODE))
             return 1;
+        break;
+    case OPTION_IAPREFIX:
+        if ( (subopt==OPTION_PD_EXCLUDE) || (subopt==OPTION_STATUS_CODE))
+            return 1;
+        break;
     case OPTION_LQ_QUERY:
       if ( (subopt == OPTION_IAADDR) || (subopt==OPTION_CLIENTID) )
         return 1;

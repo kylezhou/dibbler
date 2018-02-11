@@ -118,6 +118,31 @@ unsigned long TSrvParsClassOpt::getValidBeg()
     return this->ValidBeg;
 }
 
+void TSrvParsClassOpt::setPDExcludeSubnet(const char * subnetId)
+{
+    this->PDExcludeSubnet = new TSubnetID(subnetId);
+}
+
+void TSrvParsClassOpt::setPDExcludeSubnet(SPtr<TSubnetID> subnetId)
+{
+    this->PDExcludeSubnet = subnetId;
+}
+
+SPtr<TSubnetID> TSrvParsClassOpt::getPDExcludeSubnet()
+{
+    return this->PDExcludeSubnet;
+}
+
+void TSrvParsClassOpt::setPDExcludeLen(uint8_t len)
+{
+    this->PDExcludeLen = len;
+}
+
+uint8_t TSrvParsClassOpt::getPDExcludeLen()
+{
+    return this->PDExcludeLen;
+}
+
 //Rejected clients access routines
 void TSrvParsClassOpt::addRejedClnt(SPtr<THostRange> addr)
 {
@@ -232,5 +257,3 @@ List(std::string) TSrvParsClassOpt::getAllowClientClassString() {
 List(std::string) TSrvParsClassOpt::getDenyClientClassString() {
     return denyLst;
 }
-
-

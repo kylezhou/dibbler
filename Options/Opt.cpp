@@ -16,6 +16,7 @@
 #include "OptIAPrefix.h"
 #include "OptRtPrefix.h"
 #include "Logger.h"
+#include "OptPD_Exclude.h"
 
 int TOpt::getOptType() {
     return OptType;
@@ -172,9 +173,12 @@ bool TOpt::parseOptions(TOptContainer& options, const char* buf, size_t len,
         case OPTION_IAPREFIX:
             opt.reset(new TOptIAPrefix(buf, len, parent));
             break;
+        case OPTION_PD_EXCLUDE:
+            opt.reset(new TOptPD_Exclude(buf, len, parent));
+            break;
         case OPTION_STATUS_CODE:
             opt.reset(new TOptStatusCode(buf, len, parent));
-            options.append(opt);
+            //options.append(opt); // why is this needed?
             break;
         case OPTION_RTPREFIX: {
             opt.reset(new TOptRtPrefix(buf, len, parent));

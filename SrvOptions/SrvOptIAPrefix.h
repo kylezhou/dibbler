@@ -12,13 +12,19 @@
 #include "SmartPtr.h"
 #include "Container.h"
 #include "OptIAPrefix.h"
+#include "SubnetID.h"
 
 class TSrvOptIAPrefix : public TOptIAPrefix {
  public:
     TSrvOptIAPrefix( char * addr, int n, TMsg* parent);
-    
-    TSrvOptIAPrefix(SPtr<TIPv6Addr> prefix,char length, unsigned long pref, 
-		     unsigned long valid, TMsg* parent);
+
+    TSrvOptIAPrefix(SPtr<TIPv6Addr> prefix,char length, unsigned long pref,
+                    unsigned long valid, TMsg* parent);
+
+    TSrvOptIAPrefix(SPtr<TIPv6Addr> prefix, char length,
+                    unsigned long pref, unsigned long valid,
+                    SPtr<TSubnetID> excludeSubnet, uint8_t excludeLen,
+                    TMsg* parent);
 
     bool doDuties();
 

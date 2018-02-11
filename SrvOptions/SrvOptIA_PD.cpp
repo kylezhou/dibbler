@@ -106,6 +106,22 @@ void TSrvOptIA_PD::releaseAllPrefixes(bool quiet) {
     }
 }
 
+void TSrvOptIA_PD::addOptIAPrefix(SPtr<TIPv6Addr> prefix, char length,
+                                  unsigned long pref, unsigned long valid)
+{
+    SPtr<TOpt> optPrefix;
+    if(PD_ExcludeRequested) {
+        SPtr<TSrvCfgPD> cfgPD = SrvCfgMgr().getClassByPrefix(Iface, prefix);
+        optPrefix = new TSrvOptIAPrefix(prefix, length, pref, valid,
+                                        cfgPD->getPD_ExcludeSubnet(),
+                                        cfgPD->getPD_ExcludeLen(),
+                                        Parent);
+    } else {
+        optPrefix = new TSrvOptIAPrefix(prefix, length, pref, valid, Parent);
+    }
+    SubOptions.append(optPrefix);
+}
+
 /// @brief checks if there are existing leases (and assigns them)
 ///
 /// @return true, if existing lease(s) are found
@@ -125,10 +141,8 @@ bool TSrvOptIA_PD::existingLease() {
         Log(Debug) << "Assinging existing lease: prefix=" << prefix->get()->getPlain() << "/"
                    << prefix->getLength() << ", pref=" << prefix->getPref() << ", valid="
                    << prefix->getValid() << LogEnd;
-        SPtr<TOpt> optPrefix = new TSrvOptIAPrefix(prefix->get(), prefix->getLength(),
-                                                   prefix->getPref(), prefix->getValid(),
-                                                   this->Parent);
-        SubOptions.append( SPtr_cast<TOpt>(optPrefix));
+        addOptIAPrefix(prefix->get(), prefix->getLength(),
+                       prefix->getPref(), prefix->getValid());
     }
 
     T1_ = pd->getT1();
@@ -149,7 +163,6 @@ bool TSrvOptIA_PD::existingLease() {
 // @return true, if something was assigned
 bool TSrvOptIA_PD::assignPrefix(SPtr<TSrvMsg> clientMsg, SPtr<TIPv6Addr> hint, bool fake) {
     SPtr<TIPv6Addr> prefix;
-    SPtr<TSrvOptIAPrefix> optPrefix;
     SPtr<TSrvCfgPD> ptrPD;
     List(TIPv6Addr) prefixLst;
     SPtr<TIPv6Addr> cached;
@@ -167,9 +180,7 @@ bool TSrvOptIA_PD::assignPrefix(SPtr<TSrvMsg> clientMsg, SPtr<TIPv6Addr> hint, b
     prefixLst.first();
     while (prefix = prefixLst.get()) {
         buf << prefix->getPlain() << "/" << this->PDLength << " ";
-        optPrefix = new TSrvOptIAPrefix(prefix, (char)this->PDLength, this->Prefered, this->Valid,
-                                        this->Parent);
-        SubOptions.append(SPtr_cast<TOpt>(optPrefix));
+        addOptIAPrefix(prefix, (char)PDLength, Prefered, Valid);
 
         // We do actual reservation here, even if it is SOLICIT. For SOLICIT, we will release
         // the prefix before sending ADVERTISE. We need to do this. Otherwise we could start
@@ -215,6 +226,8 @@ TSrvOptIA_PD::TSrvOptIA_PD(SPtr<TSrvMsg> clientMsg, SPtr<TSrvOptIA_PD> queryOpt,
     ClntDuid  = clientMsg->getClientDUID();
     ClntAddr  = clientMsg->getRemoteAddr();
     Iface     = clientMsg->getIface();
+    SPtr<TOptOptionRequest> optORO = SPtr_cast<TMsg>(clientMsg)->getORO();
+    PD_ExcludeRequested = optORO && optORO->isOption(OPTION_PD_EXCLUDE);
 
     SPtr<TSrvCfgIface> ptrIface = SrvCfgMgr().getIfaceByID(Iface);
     if (!ptrIface) {
@@ -360,11 +373,9 @@ void TSrvOptIA_PD::renew(SPtr<TSrvOptIA_PD> queryOpt, SPtr<TSrvCfgIface> iface) 
     SPtr<TAddrPrefix> prefix;
     ptrIA->firstPrefix();
     while ( prefix = ptrIA->getPrefix() ) {
-        SPtr<TSrvOptIAPrefix> optPrefix;
         prefix->setTimestamp();
-        optPrefix = new TSrvOptIAPrefix(prefix->get(), prefix->getLength(), prefix->getPref(),
-                                        prefix->getValid(), this->Parent);
-        SubOptions.append( SPtr_cast<TOpt>(optPrefix) );
+        addOptIAPrefix(prefix->get(), prefix->getLength(), prefix->getPref(),
+                       prefix->getValid());
     }
 
     // finally send greetings and happy OK status code
@@ -451,9 +462,7 @@ bool TSrvOptIA_PD::assignFixedLease(SPtr<TSrvOptIA_PD> req) {
         Log(Info) << "Reserved in-pool prefix " << reservedPrefix->getPlain() << "/"
                   << static_cast<unsigned int>(ex->getPrefixLen())
                   << " for this client found, assigning." << LogEnd;
-        SPtr<TOpt> optPrefix = new TSrvOptIAPrefix(reservedPrefix, ex->getPrefixLen(),
-                                                   pref, valid, Parent);
-        SubOptions.append(optPrefix);
+        addOptIAPrefix(reservedPrefix, ex->getPrefixLen(), pref, valid);
 
         SubOptions.append(new TOptStatusCode(STATUSCODE_SUCCESS,"Assigned fixed in-pool prefix.",
                                              Parent));
@@ -476,9 +485,7 @@ bool TSrvOptIA_PD::assignFixedLease(SPtr<TSrvOptIA_PD> req) {
     Log(Info) << "Reserved out-of-pool address " << reservedPrefix->getPlain()
               << static_cast<unsigned int>(ex->getPrefixLen())
               << " for this client found, assigning." << LogEnd;
-    SPtr<TOpt> optPrefix = new TSrvOptIAPrefix(reservedPrefix, ex->getPrefixLen(), pref, valid,
-                                               Parent);
-    SubOptions.append(optPrefix);
+    addOptIAPrefix(reservedPrefix, ex->getPrefixLen(), pref, valid);
 
     SubOptions.append(new TOptStatusCode(STATUSCODE_SUCCESS,"Assigned fixed out-of-pool address.",
                                          Parent));
@@ -583,7 +590,7 @@ List(TIPv6Addr) TSrvOptIA_PD::getFreePrefixes(SPtr<TSrvMsg> clientMsg, SPtr<TIPv
 
             // Now zero the remaining part
             hint->truncate(0, ptrPD->getPD_Length());
-            
+
             // Is this hint reserved for someone else?
             if (!ptrIface->checkReservedPrefix(hint, ClntDuid, remoteID, ClntAddr))
             {
