@@ -75,7 +75,6 @@ cscope.out
 doc/version.tex
 include/stamp-h1
 libtool
-CfgMgr/FlexLexer.h
 ClntCfgMgr/ClntLexer.cpp
 RelCfgMgr/RelLexer.cpp
 SrvCfgMgr/SrvLexer.cpp
@@ -96,4 +95,4 @@ config.sub
 ltmain.sh
 libtool.m4
 ltsugar.m4
-lt-obsolete.m4
+lt~obsolete.m4
